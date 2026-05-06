@@ -3,7 +3,7 @@ package main
 // num1 and num2 in increasing order.
 // m and n : no. of elements in num1 and num2
 // Merge num1 and num2 into single array of increasing order.
-func merge(nums1 []int, m int, nums2 []int, n int) {
+func mergeSortedArray(nums1 []int, m int, nums2 []int, n int) {
 
 	// Three pointer approach.
 	// Take three pointers: p1, p2 and p.
