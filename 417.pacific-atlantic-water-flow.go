@@ -92,40 +92,58 @@ func pacificAtlantic(heights [][]int) [][]int {
 	rows := len(heights)
 	cols := len(heights[0])
 
+	// Initializing bool 2d matrix to compute result.
 	pacific := make([][]bool, rows)
 	atlantic := make([][]bool, rows)
-	visited := make([][]bool, rows)
 
-	for r := 0; r < rows; r++ {
-		visited[r] = make([]bool, cols)
+	for i := 0; i < len(pacific); i++ {
+		pacific[i] = make([]bool, cols)
 	}
-	for r := 0; r < rows; r++ {
-		pacific[r] = make([]bool, cols)
-		atlantic[r] = make([]bool, cols)
+	for i := 0; i < len(atlantic); i++ {
+		atlantic[i] = make([]bool, cols)
 	}
 
-	pacificRain := findRainSpots(0, 0, &visited)
+	var dfs func(r, c, prevHeight int, visited [][]bool)
+	dfs = func(r, c, prevHeight int, visited [][]bool) {
+		if r >= rows || c >= cols || r < 0 || c < 0 {
+			return
+		}
 
-	for r := 0; r < rows; r++ {
-		visited[r] = make([]bool, cols)
+		if visited[r][c] {
+			return
+		}
+
+		if heights[r][c] < prevHeight {
+			return
+		}
+
+		visited[r][c] = true
+		dfs(r-1, c, heights[r][c], visited)
+		dfs(r+1, c, heights[r][c], visited)
+		dfs(r, c-1, heights[r][c], visited)
+		dfs(r, c+1, heights[r][c], visited)
 	}
-	atlanticRain := findRainSpots(rows-1, cols-1, &visited)
 
-	ans := make([][]int, 0)
+	for i := 0; i < rows; i++ {
+		dfs(i, 0, 0, pacific)
+		dfs(i, cols-1, 0, atlantic)
+	}
+
+	for i := 0; i < cols; i++ {
+		dfs(0, i, 0, pacific)
+		dfs(rows-1, i, 0, atlantic)
+	}
+
+	result := make([][]int, 0)
+	// Find the same fields
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
-			if pacificRain[i][j] && atlanticRain[i][j] {
-				ans = append(ans, []int{i, j})
+			if atlantic[i][j] && pacific[i][j] {
+				result = append(result, []int{i, j})
 			}
 		}
 	}
-}
-
-// Returns the list of points from where water can flow into a ocean.
-func findRainSpots(row, column int, visited *[][]bool) [][]bool {
-	dir := [][]int{
-		{1, 0}, {-1, 0}, {0, 1}, {0, -1},
-	}
+	return result
 }
 
 // @lc code=end

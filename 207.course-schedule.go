@@ -61,10 +61,53 @@ package main
  */
 
 // @lc code=start
+
+/*
+1. Iterate all the courses from 0 to numCourses-1
+2. For each course, do a DFS
+3. DUring DFS and its neighbours DFS, keep status of node as 1.
+4. Once DFS completes for a node return status 2 and true
+5. If any false is received, return false
+*/
 func canFinish(numCourses int, prerequisites [][]int) bool {
 	graph := make([][]int, numCourses)
 	state := make([]int, numCourses)
 
+	// Create the graph adjacency list and
+	// populate the state slice.
+	for _, p := range prerequisites {
+		course := p[0]
+		prereq := p[1]
+		graph[prereq] = append(graph[prereq], course)
+	}
+
+	var dfs func(course int) bool
+	dfs = func(course int) bool {
+		if state[course] == 1 {
+			return false
+		}
+		if state[course] == 2 {
+			return true
+		}
+
+		state[course] = 1
+
+		for _, next := range graph[course] {
+			if !dfs(next) {
+				return false
+			}
+		}
+
+		state[course] = 2
+		return true
+	}
+
+	for course := 0; course < numCourses; course++ {
+		if !dfs(course) {
+			return false
+		}
+	}
+	return true
 }
 
 // @lc code=end

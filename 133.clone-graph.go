@@ -101,66 +101,63 @@ type Node struct {
 
 func cloneGraph(node *Node) *Node {
 	visited := make(map[*Node]*Node)
-	return bfs(node, visited)
-	// return dfs(node, visited)
+	// return bfs(node, visited)
+	return dfs(node, visited)
 
 }
 
-// BFS approach.
-func bfs(node *Node, visited map[*Node]*Node) *Node {
+// DFS approach.
+func dfs(node *Node, visited map[*Node]*Node) *Node {
 	if node == nil {
 		return nil
 	}
 
-	queue := []*Node{node}
+	// If the node already exists in the visited list,
+	// return the cloned node.
+	if _, ok := visited[node]; ok {
+		return visited[node]
+	}
+
+	// If not cloned already, create a clone node
+	// and add to the visited list.
 	clone := &Node{
 		Val: node.Val,
 	}
 	visited[node] = clone
 
-	for len(queue) > 0 {
-		curr := queue[0]
-		queue = queue[1:]
-
-		for _, neighbour := range curr.Neighbors {
-			if _, ok := visited[neighbour]; !ok {
-				visited[neighbour] = &Node{Val: neighbour.Val}
-				queue = append(queue, neighbour)
-			}
-
-			// If visited already, then append to neighbour slice.
-			visited[curr].Neighbors = append(visited[curr].Neighbors, visited[neighbour])
-		}
+	// Now, repeate the same for its neighbours and add them to the
+	// visited list and neighbours of the cloned nodes as well.
+	for _, n := range node.Neighbors {
+		clone.Neighbors = append(clone.Neighbors, dfs(n, visited))
 	}
 
 	return visited[node]
 }
 
-// DFS approach.
-
-// func dfs(node *Node, visited map[*Node]*Node) *Node {
+// BFS approach.
+// func bfs(node *Node, visited map[*Node]*Node) *Node {
 // 	if node == nil {
 // 		return nil
 // 	}
-
-// 	// If the node already exists in the visited hashmap,
-// 	// return its clone.
-// 	if val, ok := visited[node]; ok {
-// 		return val
-// 	}
-
-// 	// If not, we need to add it to the hashmap.
+// 	queue := []*Node{node}
 // 	clone := &Node{
 // 		Val: node.Val,
 // 	}
 // 	visited[node] = clone
-// 	// Check the neighbours of the node.
-// 	for _, neighbour := range node.Neighbors {
-// 		clone.Neighbors = append(clone.Neighbors, dfs(neighbour, visited))
+
+// 	for len(queue) > 0 {
+// 		curr := queue[0]
+// 		queue = queue[1:]
+
+// 		for _, nbr := range curr.Neighbors {
+// 			if _, ok := visited[nbr]; !ok {
+// 				visited[nbr] = &Node{Val: nbr.Val}
+// 				queue = append(queue, nbr)
+// 			}
+// 			visited[curr].Neighbors = append(visited[curr].Neighbors, visited[nbr])
+// 		}
 // 	}
-
-// 	return dfs(node, visited)
-
+// 	return visited[node]
 // }
 
 // @lc code=end
