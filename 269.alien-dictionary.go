@@ -37,20 +37,80 @@ Approach:
 func alienOrder(words []string) string {
 
 	// Create adjacency map.
-	adj := make(map[byte][]byte, 0)
+	adj := make(map[byte]map[byte]bool)
+	for _, word := range words {
+		for i := 0; i < len(word); i++ {
+			if _, ok := adj[word[i]]; !ok {
+				adj[word[i]] = make(map[byte]bool)
+			}
+		}
+	}
+
 	for i := 0; i < len(words)-1; i++ {
 		currWd := words[i]
 		nextWd := words[i+1]
 
 		minLen := min(len(currWd), len(nextWd))
+		foundOrdering := false
 
 		for j := 0; j < minLen; j++ {
 			if currWd[j] != nextWd[j] {
 				from := currWd[j]
 				to := nextWd[j]
 
-				adj[from] = append(adj[from], to)
+				adj[from][to] = true
+				foundOrdering = true
+				break
+			}
+		}
+
+		if !foundOrdering && len(currWd) > len(nextWd) {
+			return ""
+		}
+	}
+
+	// Now that we have the adjacency list, lets create
+	// a ordering and then use topological sort.
+	return topoSort(adj)
+}
+
+// topoSort returns the topological sort of the given graph.
+// Uses BFS.
+func topoSort(adj map[byte]map[byte]bool) string {
+	indegree := make(map[byte]int)
+	for ch := range adj {
+		indegree[ch] = 0
+	}
+
+	for _, neighbors := range adj {
+		for nei := range neighbors {
+			indegree[nei]++
+		}
+	}
+
+	queue := []byte{}
+	for ch, degree := range indegree {
+		if degree == 0 {
+			queue = append(queue, ch)
+		}
+	}
+
+	order := []byte{}
+	for len(queue) > 0 {
+		ch := queue[0]
+		queue = queue[1:]
+		order = append(order, ch)
+
+		for nei := range adj[ch] {
+			indegree[nei]--
+			if indegree[nei] == 0 {
+				queue = append(queue, nei)
 			}
 		}
 	}
+
+	if len(order) != len(indegree) {
+		return ""
+	}
+	return string(order)
 }
